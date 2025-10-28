@@ -17,6 +17,34 @@ public class HomeServlet2 extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String DEFAULT_NAME = "World";
     private static final int MAX_NAME_LENGTH = 50;
+    
+    private static final String HTML_TEMPLATE = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Greeting</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+                <h2>Hello %s</h2>
+            </body>
+            </html>""";
+            
+    /**
+     * Sanitizes and validates the user input.
+     * @param input The user input to sanitize
+     * @return The sanitized input
+     */
+    private String sanitizeInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return DEFAULT_NAME;
+        }
+        String sanitized = input.trim();
+        if (sanitized.length() > MAX_NAME_LENGTH) {
+            sanitized = sanitized.substring(0, MAX_NAME_LENGTH);
+        }
+        return Encode.forHtml(sanitized);
+    }
 
     public HomeServlet2() {
         super();
@@ -38,31 +66,17 @@ public class HomeServlet2 extends HttpServlet {
         // Set security headers
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("X-Frame-Options", "DENY");
-        response.setHeader("Content-Security-Policy", "default-src 'self'");
+        response.setHeader("X-XSS-Protection", "1; mode=block");
+        response.setHeader("Content-Security-Policy", 
+            "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'none'");
         
-        String name = request.getParameter("name");
-        if (name == null || name.trim().isEmpty()) {
-            name = DEFAULT_NAME;
-        } else {
-            name = name.trim();
-            if (name.length() > MAX_NAME_LENGTH) {
-                name = name.substring(0, MAX_NAME_LENGTH);
-            }
-        }
+        // Get and sanitize the input
+        String sanitizedName = sanitizeInput(request.getParameter("name"));
         
+        // Set content type and write response
         response.setContentType("text/html; charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            StringBuilder html = new StringBuilder()
-                .append("<!DOCTYPE html>\n")
-                .append("<html>\n")
-                .append("<head>\n")
-                .append("<title>Greeting</title>\n")
-                .append("</head>\n")
-                .append("<body>\n")
-                .append("<h2>Hello ").append(Encode.forHtml(name)).append("</h2>\n")
-                .append("</body>\n")
-                .append("</html>");
-            out.print(html.toString());
+            out.print(String.format(HTML_TEMPLATE, sanitizedName));
         }
     }
 
