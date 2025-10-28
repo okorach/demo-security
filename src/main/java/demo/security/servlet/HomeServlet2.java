@@ -18,18 +18,31 @@ public class HomeServlet2 extends HttpServlet {
     private static final String DEFAULT_NAME = "World";
     private static final int MAX_NAME_LENGTH = 50;
     
-    private static final String HTML_START = "<!DOCTYPE html><html><head><title>Greeting</title>" +
-            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"></head><body>";
-    private static final String HTML_END = "</body></html>";
-    private static final String GREETING_TEMPLATE = "<h2>Hello %s</h2>";
-    
+    private static final String HTML_DOCUMENT = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Greeting</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body>
+                <h2>Hello </h2>
+            </body>
+            </html>""";
+            
     /**
-     * Builds a safe HTML response.
-     * @param content The content to include in the response
+     * Creates a safe HTML document with the given name.
+     * @param name The sanitized name to include
      * @return The complete HTML document
      */
-    private static String buildSafeHtml(String content) {
-        return HTML_START + content + HTML_END;
+    private static String createHtmlResponse(String name) {
+        int insertPoint = HTML_DOCUMENT.indexOf("</h2>");
+        if (insertPoint == -1) {
+            return HTML_DOCUMENT;
+        }
+        return HTML_DOCUMENT.substring(0, insertPoint) + name + HTML_DOCUMENT.substring(insertPoint);
     }
             
     /**
@@ -78,8 +91,7 @@ public class HomeServlet2 extends HttpServlet {
         // Set content type and write response
         response.setContentType("text/html; charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String greeting = String.format(GREETING_TEMPLATE, sanitizedName);
-            out.print(buildSafeHtml(greeting));
+            out.print(createHtmlResponse(sanitizedName));
         }
     }
 
