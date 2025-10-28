@@ -18,17 +18,19 @@ public class HomeServlet2 extends HttpServlet {
     private static final String DEFAULT_NAME = "World";
     private static final int MAX_NAME_LENGTH = 50;
     
-    private static final String HTML_TEMPLATE = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Greeting</title>
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            </head>
-            <body>
-                <h2>Hello %s</h2>
-            </body>
-            </html>""";
+    private static final String HTML_START = "<!DOCTYPE html><html><head><title>Greeting</title>" +
+            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"></head><body>";
+    private static final String HTML_END = "</body></html>";
+    private static final String GREETING_TEMPLATE = "<h2>Hello %s</h2>";
+    
+    /**
+     * Builds a safe HTML response.
+     * @param content The content to include in the response
+     * @return The complete HTML document
+     */
+    private static String buildSafeHtml(String content) {
+        return HTML_START + content + HTML_END;
+    }
             
     /**
      * Sanitizes and validates the user input.
@@ -76,7 +78,8 @@ public class HomeServlet2 extends HttpServlet {
         // Set content type and write response
         response.setContentType("text/html; charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            out.print(String.format(HTML_TEMPLATE, sanitizedName));
+            String greeting = String.format(GREETING_TEMPLATE, sanitizedName);
+            out.print(buildSafeHtml(greeting));
         }
     }
 
