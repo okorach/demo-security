@@ -90,8 +90,25 @@ public class HomeServlet2 extends HttpServlet {
         
         // Set content type and write response
         response.setContentType("text/html; charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
             out.print(createHtmlResponse(sanitizedName));
+            out.flush();
+        } catch (IOException e) {
+            // Log the error and send an error response
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+                    "Error generating response: " + e.getMessage());
+            } catch (IOException sendError) {
+                // If we can't even send the error response, just throw the original exception
+                throw e;
+            }
+        } finally {
+            if (out != null) {
+                out.close();
+            }
         }
     }
 
@@ -106,7 +123,17 @@ public class HomeServlet2 extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
-        doGet(request, response);
+        try {
+            doGet(request, response);
+        } catch (ServletException | IOException e) {
+            // If doGet throws an exception, ensure we send an error response
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+                    "Error processing request: " + e.getMessage());
+            } catch (IOException sendError) {
+                throw e; // If we can't send the error, throw the original exception
+            }
+        }
     }
 
 }
