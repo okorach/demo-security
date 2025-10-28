@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.owasp.encoder.Encode;
 
 @WebServlet("/helloWorld")
 public class HomeServlet2 extends HttpServlet {
@@ -14,22 +15,27 @@ public class HomeServlet2 extends HttpServlet {
 
     public HomeServlet2() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 
+    @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-        String name = request.getParameter("name").trim();
+        String name = request.getParameter("name");
+        if (name == null) {
+            name = "World";
+        } else {
+            name = name.trim();
+        }
         response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
-        out.print("<h2>Hello "+name+ "</h2>");
-        out.close();
+        try (PrintWriter out = response.getWriter()) {
+            out.print("<h2>Hello " + Encode.forHtml(name) + "</h2>");
+        }
     }
 
+    @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
-        // TODO Auto-generated method stub
         doGet(request, response);
     }
 
