@@ -49,13 +49,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
-        mvn -B test -Pcoverage verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.javaOpts="-Xmx8192m " \
-        -Dsonar.scanner.debug="true" \
-        -Dsonar.sources="." \
-        -Dsonar.exclusions="src/test/java/**/*" \
-        -Dsonar.tests="src/test/java" \
-        -X
+        mvn -B test -Pcoverage verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -X
 
     - name: SonarQube Pull Request Analysis
       if: ${{ github.event_name == 'pull_request' }}
@@ -64,16 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
-        mvn -B test -Pcoverage verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.pullrequest.key="${{ github.event.pull_request.number }}" \
-        -Dsonar.pullrequest.base="${{ github.event.pull_request.base.ref }}" \
-        -Dsonar.pullrequest.branch="${{ github.head_ref }}" \
-        -Dsonar.javaOpts="-Xmx8192m " \
-        -Dsonar.scanner.debug="true" \
-        -Dsonar.sources="." \
-        -Dsonar.exclusions="src/test/java/**/*" \
-        -Dsonar.tests="src/test/java" \
-        -X
+        mvn -B test -Pcoverage verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     #- name: Update dependency graph
