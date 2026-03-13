@@ -1,1 +1,1 @@
-Demo MCP Server
+Demo Security
